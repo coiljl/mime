@@ -1,6 +1,6 @@
 @require "parse-json" parse
 
-const db = open(parse, "$(dirname(string(current_module())))/dependencies/mime-db/db.json")
+const db = open(parse, "$(@dirname)/dependencies/mime-db/db.json")
 
 # types[extension] = type
 const types = Dict{String,String}()
