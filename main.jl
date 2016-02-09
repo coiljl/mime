@@ -1,33 +1,35 @@
-@require "parse-json" parse
+@require "github.com/jkroso/parse-json" parse
 
-const db = open(parse, "$(@dirname)/dependencies/mime-db/db.json")
+const db = open(parse, "$(@dirname)/deps/mime-db.json")
 
-# types[extension] = type
-const types = Dict{String,String}()
+"""
+types[extension] = type
+"""
+const types = Dict{ASCIIString,ASCIIString}()
 
 for (mime, info) in db
-  exts = get(info, "extensions", {})
+  exts = get(info, "extensions", Dict())
   isempty(exts) && continue
   for ext in exts
     types[ext] = mime
   end
 end
 
-##
-# Get the mime type of a file `path`
-#
-lookup(path::String) = get(types, ext(path), nothing)
+"""
+Get the mime type of a file `path`
+"""
+lookup(path::AbstractString) = get(types, ext(path), nothing)
 
-##
-# Get the extension of `path`
-#
-ext(path::String) = splitext(path)[2][2:end]
+"""
+Get the extension of `path`
+"""
+ext(path::AbstractString) = splitext(path)[2][2:end]
 
 ##
 # Get the expected string encoding for a mime type
 #
-charset(::Nothing) = nothing
-function charset(mime::String)
+charset(::Void) = nothing
+charset(mime::AbstractString) = begin
   info = get(db, mime, db)
   haskey(info, "charset") && return info["charset"]
   # default text/* to utf-8
@@ -37,7 +39,7 @@ end
 ##
 # Generate the HTTP Content-Type header for `mime`
 #
-function content_type(mime::String)
+content_type(mime::AbstractString) = begin
   if !haskey(db, mime) mime = lookup(mime) end
   encoding = charset(mime)
   encoding === nothing && return mime
@@ -47,7 +49,7 @@ end
 ##
 # Checks if a type is compressible.
 #
-function compressible(mime::String)
+compressible(mime::AbstractString) = begin
   # strip charset
   mime = split(mime, ';')[1]
   # attempt to look up from database
