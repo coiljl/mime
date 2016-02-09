@@ -2,9 +2,6 @@
 
 const db = open(parse, "$(@dirname)/deps/mime-db.json")
 
-"""
-types[extension] = type
-"""
 const types = Dict{ASCIIString,ASCIIString}()
 
 for (mime, info) in db
@@ -25,9 +22,9 @@ Get the extension of `path`
 """
 ext(path::AbstractString) = splitext(path)[2][2:end]
 
-##
-# Get the expected string encoding for a mime type
-#
+"""
+Get the expected string encoding for a mime type
+"""
 charset(::Void) = nothing
 charset(mime::AbstractString) = begin
   info = get(db, mime, db)
@@ -36,9 +33,9 @@ charset(mime::AbstractString) = begin
   ismatch(r"^text/.", mime) ? "UTF-8" : nothing
 end
 
-##
-# Generate the HTTP Content-Type header for `mime`
-#
+"""
+Generate the HTTP Content-Type header for `mime`
+"""
 content_type(mime::AbstractString) = begin
   if !haskey(db, mime) mime = lookup(mime) end
   encoding = charset(mime)
@@ -46,9 +43,9 @@ content_type(mime::AbstractString) = begin
   "$mime; charset=$(lowercase(encoding))"
 end
 
-##
-# Checks if a type is compressible.
-#
+"""
+Checks if a type is compressible.
+"""
 compressible(mime::AbstractString) = begin
   # strip charset
   mime = split(mime, ';')[1]
