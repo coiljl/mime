@@ -1,8 +1,8 @@
-@require "github.com/jkroso/parse-json" parse
+@require "github.com/jkroso/parse-json.jl" parse
 
 const db = open(parse, "$(@dirname)/deps/mime-db.json")
 
-const types = Dict{ASCIIString,ASCIIString}()
+const types = Dict{String,String}()
 
 for (mime, info) in db
   exts = get(info, "extensions", Dict())
@@ -25,12 +25,12 @@ ext(path::AbstractString) = splitext(path)[2][2:end]
 """
 Get the expected string encoding for a mime type
 """
-charset(::Void) = nothing
+charset(::Nothing) = nothing
 charset(mime::AbstractString) = begin
   info = get(db, mime, db)
   haskey(info, "charset") && return info["charset"]
   # default text/* to utf-8
-  ismatch(r"^text/.", mime) ? "UTF-8" : nothing
+  occursin(r"^text/.", mime) ? "UTF-8" : nothing
 end
 
 """
@@ -53,5 +53,5 @@ compressible(mime::AbstractString) = begin
   info = get(db, mime, nothing)
   info !== nothing && return get(info, "compressible", false)
   # fallback to regex if not found
-  ismatch(r"^text/|\+json$|\+text$|\+xml$", mime)
+  occursin(r"^text/|\+json$|\+text$|\+xml$", mime)
 end
